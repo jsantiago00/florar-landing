@@ -1,12 +1,17 @@
-import { Redis } from "@upstash/redis";
+import Redis from "ioredis";
 
 const KEY = "florar:data";
 
+let client;
+
 function getRedis() {
-  const url = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
-  const token = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
-  if (!url || !token) return null;
-  return new Redis({ url, token });
+  const url =
+    process.env.REDIS_URL ||
+    process.env.KV_URL ||
+    process.env.UPSTASH_REDIS_URL;
+  if (!url) return null;
+  if (!client) client = new Redis(url);
+  return client;
 }
 
 export const DEFAULT_DATA = {
@@ -89,8 +94,8 @@ export async function getData() {
     // Sin Redis configurado todavía (desarrollo local): devolvemos el default.
     return DEFAULT_DATA;
   }
-  const data = await redis.get(KEY);
-  return data || DEFAULT_DATA;
+  const raw = await redis.get(KEY);
+  return raw ? JSON.parse(raw) : DEFAULT_DATA;
 }
 
 export async function setData(data) {
@@ -98,7 +103,7 @@ export async function setData(data) {
   if (!redis) {
     throw new Error("No hay base de datos configurada (falta conectar Redis en Vercel)");
   }
-  await redis.set(KEY, data);
+  await redis.set(KEY, JSON.stringify(data));
 }
 
 export function checkPassword(pw) {
