@@ -13,37 +13,38 @@ La landing, al cargar, pide los links a la API de Vercel. Si esa API todavía no
 2. En GitHub: Settings → Pages → Source: rama `main`, carpeta `/ (root)`.
 3. Listo, va a quedar en `https://<usuario>.github.io/<repo>/`. Podés después conectar un dominio propio (florar.com.ar, por ejemplo) desde el mismo panel de Pages.
 
-## 2. Publicar el panel de admin en Vercel
+## 2. El panel de admin en Vercel
 
-1. En [vercel.com](https://vercel.com), "Add New Project", importá el mismo repo de GitHub.
-2. Cuando pida la configuración: **Root Directory** → elegí `admin-app` (importante, si no va a intentar deployar todo el repo).
-3. En **Environment Variables** agregá:
-   - `ADMIN_PASSWORD` = la contraseña que va a usar la dueña para entrar a `/admin` (elegí una fuerte).
-4. Andá a la pestaña **Storage** del proyecto en Vercel → **Marketplace** → agregá una base **Redis** (integración de Upstash, es gratis en el plan hobby). Al conectarla, Vercel agrega solas las variables `KV_REST_API_URL` y `KV_REST_API_TOKEN` — no hay que tocarlas a mano.
-5. Deployá. Vas a tener una URL tipo `https://florar-admin.vercel.app`.
+Ya está desplegado en **https://admin-app-silk-nu.vercel.app** (proyecto `admin-app` en Vercel, conectado a este mismo repo con **Root Directory = `admin-app`** y **Production Branch = `main`**). Cualquier push a `main` que toque algo dentro de `admin-app/` dispara un deploy automático.
+
+Config actual del proyecto:
+- **Environment Variables**: `ADMIN_PASSWORD` (contraseña de `/admin`) y `REDIS_URL` (la agrega sola Vercel al conectar la base — Storage → Marketplace → Redis).
+- El cliente de datos usa `ioredis` contra `REDIS_URL` (ver [`admin-app/lib/store.js`](admin-app/lib/store.js)).
+
+Si alguna vez hay que recrear el proyecto desde cero: Add New Project → importar este repo → Root Directory `admin-app` → agregar `ADMIN_PASSWORD` → conectar Redis desde Storage → Marketplace.
 
 ### Conectar la landing con el admin
 
-Editá [`config.js`](config.js) en la raíz del repo y poné la URL de Vercel:
+[`config.js`](config.js) en la raíz del repo ya apunta a la URL de Vercel:
 
 ```js
 window.FLORAR_CONFIG = {
-  ADMIN_API_URL: "https://florar-admin.vercel.app"
+  ADMIN_API_URL: "https://admin-app-silk-nu.vercel.app"
 };
 ```
 
-Subí ese cambio a GitHub. A partir de ahí, la landing pública lee siempre los datos en vivo desde `/api/links`, y cada vez que la dueña guarde cambios en `/admin` se van a reflejar en la landing sin volver a tocar GitHub.
+Si el dominio de Vercel cambia alguna vez, hay que actualizar esa línea y subirla a GitHub.
 
 ## 3. Usar el panel de edición
 
-1. Entrar a `https://florar-admin.vercel.app/admin`.
+1. Entrar a `https://admin-app-silk-nu.vercel.app/admin`.
 2. Ingresar la contraseña (`ADMIN_PASSWORD`).
-3. Ahí puede:
+3. Ahí se puede:
    - Editar título, subtítulo y logo del perfil.
-   - Editar texto y URL de cada botón.
+   - Editar texto y URL de cada botón (si falta `http(s)://` se agrega solo al guardar).
    - Agregar o eliminar botones y títulos de sección.
-   - Reordenar todo con las flechas ↑ / ↓.
-4. Botón "Guardar cambios" al final. Los cambios quedan guardados en la base de datos y la landing los muestra al instante (recargando la página).
+   - Reordenar arrastrando el ícono `⠿` de cada item, o con las flechas ↑ / ↓.
+4. Botón "Guardar cambios" al final. Los cambios quedan en Redis y la landing los muestra al instante (recargando la página), sin tocar GitHub.
 
 ## Logo
 
