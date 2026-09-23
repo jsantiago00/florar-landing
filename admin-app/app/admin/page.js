@@ -1,9 +1,17 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 function uid() {
   return Math.random().toString(36).slice(2, 10);
+}
+
+function normalizeUrl(url) {
+  if (!url) return url;
+  const trimmed = url.trim();
+  if (/^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(trimmed)) return trimmed;
+  if (trimmed.startsWith("//")) return "https:" + trimmed;
+  return "https://" + trimmed;
 }
 
 export default function AdminPage() {
@@ -15,6 +23,10 @@ export default function AdminPage() {
   const [data, setData] = useState(null);
   const [saving, setSaving] = useState(false);
   const [status, setStatus] = useState(null); // { ok: bool, msg: string }
+
+  const listRef = useRef(null);
+  const draggingIdRef = useRef(null);
+  const [draggingId, setDraggingId] = useState(null);
 
   useEffect(() => {
     const saved = typeof window !== "undefined" ? sessionStorage.getItem("florar-admin-pw") : null;
@@ -79,6 +91,46 @@ export default function AdminPage() {
     });
   }
 
+  function handleDragPointerDown(e, id) {
+    e.preventDefault();
+    draggingIdRef.current = id;
+    setDraggingId(id);
+    window.addEventListener("pointermove", handleDragPointerMove);
+    window.addEventListener("pointerup", handleDragPointerUp);
+  }
+
+  function handleDragPointerMove(e) {
+    const draggingItemId = draggingIdRef.current;
+    if (!draggingItemId || !listRef.current) return;
+    const rows = Array.from(listRef.current.querySelectorAll("[data-item-row]"));
+    const y = e.clientY;
+    let targetId = null;
+    for (const row of rows) {
+      const rect = row.getBoundingClientRect();
+      if (y >= rect.top && y <= rect.bottom) {
+        targetId = row.getAttribute("data-item-row");
+        break;
+      }
+    }
+    if (!targetId || targetId === draggingItemId) return;
+    setData((d) => {
+      const items = [...d.items];
+      const fromIdx = items.findIndex((it) => it.id === draggingItemId);
+      const toIdx = items.findIndex((it) => it.id === targetId);
+      if (fromIdx === -1 || toIdx === -1) return d;
+      const [moved] = items.splice(fromIdx, 1);
+      items.splice(toIdx, 0, moved);
+      return { ...d, items };
+    });
+  }
+
+  function handleDragPointerUp() {
+    draggingIdRef.current = null;
+    setDraggingId(null);
+    window.removeEventListener("pointermove", handleDragPointerMove);
+    window.removeEventListener("pointerup", handleDragPointerUp);
+  }
+
   function removeItem(id) {
     if (!confirm("¿Eliminar este elemento?")) return;
     setData((d) => ({ ...d, items: d.items.filter((it) => it.id !== id) }));
@@ -99,6 +151,13 @@ export default function AdminPage() {
   async function handleSave() {
     setSaving(true);
     setStatus(null);
+    const payload = {
+      ...data,
+      items: data.items.map((it) =>
+        it.type === "link" ? { ...it, url: normalizeUrl(it.url) } : it
+      )
+    };
+    setData(payload);
     try {
       const res = await fetch("/api/links", {
         method: "PUT",
@@ -106,7 +165,7 @@ export default function AdminPage() {
           "Content-Type": "application/json",
           "x-admin-password": password
         },
-        body: JSON.stringify(data)
+        body: JSON.stringify(payload)
       });
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
@@ -211,48 +270,65 @@ export default function AdminPage() {
 
       <div className="card">
         <h2>Botones y secciones</h2>
-        {data.items.map((item, idx) => (
-          <div className="item-row" key={item.id}>
-            <div className="item-top">
-              <span className="item-type-badge">
-                {item.type === "header" ? "Título de sección" : "Link"}
-              </span>
-              <div className="item-actions">
-                <button onClick={() => moveItem(item.id, -1)} disabled={idx === 0} title="Subir">
-                  ↑
-                </button>
-                <button
-                  onClick={() => moveItem(item.id, 1)}
-                  disabled={idx === data.items.length - 1}
-                  title="Bajar"
-                >
-                  ↓
-                </button>
-                <button className="btn-danger" onClick={() => removeItem(item.id)}>
-                  Eliminar
-                </button>
+        <p className="hint">Mantené apretado ⠿ y arrastrá para reordenar.</p>
+        <div ref={listRef}>
+          {data.items.map((item, idx) => (
+            <div
+              className={"item-row" + (draggingId === item.id ? " dragging" : "")}
+              key={item.id}
+              data-item-row={item.id}
+            >
+              <div className="item-top">
+                <div className="item-top-left">
+                  <span
+                    className="drag-handle"
+                    onPointerDown={(e) => handleDragPointerDown(e, item.id)}
+                    title="Arrastrar para reordenar"
+                  >
+                    ⠿
+                  </span>
+                  <span className="item-type-badge">
+                    {item.type === "header" ? "Título de sección" : "Link"}
+                  </span>
+                </div>
+                <div className="item-actions">
+                  <button onClick={() => moveItem(item.id, -1)} disabled={idx === 0} title="Subir">
+                    ↑
+                  </button>
+                  <button
+                    onClick={() => moveItem(item.id, 1)}
+                    disabled={idx === data.items.length - 1}
+                    title="Bajar"
+                  >
+                    ↓
+                  </button>
+                  <button className="btn-danger" onClick={() => removeItem(item.id)}>
+                    Eliminar
+                  </button>
+                </div>
               </div>
-            </div>
-            <div className="field" style={{ marginBottom: item.type === "header" ? 0 : 8 }}>
-              <label>Texto</label>
-              <input
-                type="text"
-                value={item.label}
-                onChange={(e) => updateItem(item.id, "label", e.target.value)}
-              />
-            </div>
-            {item.type === "link" && (
-              <div className="field" style={{ marginBottom: 0 }}>
-                <label>URL</label>
+              <div className="field" style={{ marginBottom: item.type === "header" ? 0 : 8 }}>
+                <label>Texto</label>
                 <input
-                  type="url"
-                  value={item.url}
-                  onChange={(e) => updateItem(item.id, "url", e.target.value)}
+                  type="text"
+                  value={item.label}
+                  onChange={(e) => updateItem(item.id, "label", e.target.value)}
                 />
               </div>
-            )}
-          </div>
-        ))}
+              {item.type === "link" && (
+                <div className="field" style={{ marginBottom: 0 }}>
+                  <label>URL</label>
+                  <input
+                    type="text"
+                    value={item.url}
+                    onChange={(e) => updateItem(item.id, "url", e.target.value)}
+                    onBlur={(e) => updateItem(item.id, "url", normalizeUrl(e.target.value))}
+                  />
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
 
         <div className="add-row">
           <button className="btn-secondary" onClick={() => addItem("link")}>

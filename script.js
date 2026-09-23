@@ -1,6 +1,14 @@
 (function () {
   var API_BASE = (window.FLORAR_CONFIG && window.FLORAR_CONFIG.ADMIN_API_URL) || "";
 
+  function normalizeUrl(url) {
+    if (!url) return url;
+    var trimmed = url.trim();
+    if (/^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(trimmed)) return trimmed;
+    if (trimmed.indexOf("//") === 0) return "https:" + trimmed;
+    return "https://" + trimmed;
+  }
+
   function escapeHtml(str) {
     return String(str)
       .replace(/&/g, "&amp;")
@@ -33,7 +41,7 @@
       } else {
         var a = document.createElement("a");
         a.className = "link-btn";
-        a.href = item.url;
+        a.href = normalizeUrl(item.url);
         a.target = "_blank";
         a.rel = "noopener noreferrer";
         a.innerHTML = escapeHtml(item.label) + '<span class="arrow">→</span>';
