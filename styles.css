@@ -2,7 +2,7 @@
   --bg-outer: #8d7999;
   --bg-card: #9c88a8;
   --btn-fill: rgba(255, 255, 255, 0.08);
-  --btn-border: rgba(255, 255, 255, 0.55);
+  --btn-border: #4a2e52;
   --btn-fill-hover: rgba(255, 255, 255, 0.18);
   --text-color: #ffffff;
   --text-subtle: rgba(255, 255, 255, 0.85);
@@ -39,7 +39,7 @@ body {
 
 .topbar {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: center;
   margin-bottom: 24px;
 }
@@ -145,11 +145,17 @@ body {
   background: var(--btn-fill-hover);
 }
 
-.link-btn .dots {
+.link-btn .arrow {
   position: absolute;
   right: 18px;
-  font-size: 16px;
-  opacity: 0.8;
+  font-size: 15px;
+  opacity: 0.85;
+  transition: transform 0.15s ease;
+}
+
+.link-btn:hover .arrow,
+.link-btn:focus-visible .arrow {
+  transform: translateX(3px);
 }
 
 .loading,

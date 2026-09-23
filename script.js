@@ -36,7 +36,7 @@
         a.href = item.url;
         a.target = "_blank";
         a.rel = "noopener noreferrer";
-        a.innerHTML = escapeHtml(item.label) + '<span class="dots">⋮</span>';
+        a.innerHTML = escapeHtml(item.label) + '<span class="arrow">→</span>';
         itemsEl.appendChild(a);
       }
     });

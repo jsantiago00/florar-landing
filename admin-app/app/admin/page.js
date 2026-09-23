@@ -131,6 +131,8 @@ export default function AdminPage() {
     return (
       <div className="login-wrap">
         <form className="login-card" onSubmit={handleLoginSubmit}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img className="login-logo" src="/logo.png" alt="Florar" />
           <h1>Florar Admin</h1>
           <p>Ingresá la contraseña para editar la landing.</p>
           <div className="field">
@@ -160,7 +162,11 @@ export default function AdminPage() {
   return (
     <div className="wrap">
       <div className="topbar-admin">
-        <h1>Editar Florar</h1>
+        <div className="topbar-admin-title">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo.png" alt="Florar" />
+          <h1>Editar Florar</h1>
+        </div>
         <button className="btn-secondary" onClick={logout}>
           Salir
         </button>
