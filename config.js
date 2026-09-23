@@ -6,5 +6,5 @@
 //
 // Ejemplo una vez deployado: "https://florar-admin.vercel.app"
 window.FLORAR_CONFIG = {
-  ADMIN_API_URL: ""
+  ADMIN_API_URL: "https://admin-app-silk-nu.vercel.app"
 };
