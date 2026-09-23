@@ -1,0 +1,4 @@
+admin-app/node_modules/
+admin-app/.next/
+admin-app/.env.local
+admin-app/.vercel
