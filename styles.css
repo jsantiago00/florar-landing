@@ -21,7 +21,7 @@ html, body {
 
 body {
   min-height: 100vh;
-  font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  font-family: "Quicksand", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
   background: var(--bg-outer);
   display: flex;
   justify-content: center;
@@ -99,6 +99,7 @@ body {
 .profile p {
   margin: 0;
   font-size: 13.5px;
+  font-weight: 600;
   line-height: 1.4;
   color: var(--text-subtle);
   max-width: 320px;
