@@ -30,7 +30,7 @@ body {
 
 .page {
   width: 100%;
-  max-width: 420px;
+  max-width: 440px;
   background: var(--bg-card);
   border-radius: 28px;
   padding: 20px 20px 40px;
@@ -68,8 +68,8 @@ body {
 }
 
 .logo {
-  width: 84px;
-  height: 84px;
+  width: 92px;
+  height: 92px;
   border-radius: 50%;
   background: var(--logo-bg);
   display: flex;
@@ -90,19 +90,19 @@ body {
 }
 
 .profile h1 {
-  margin: 0 0 8px;
-  font-size: 19px;
+  margin: 0 0 10px;
+  font-size: 25px;
   font-weight: 700;
   color: var(--text-color);
 }
 
 .profile p {
   margin: 0;
-  font-size: 13.5px;
+  font-size: 17.5px;
   font-weight: 600;
   line-height: 1.4;
   color: var(--text-subtle);
-  max-width: 320px;
+  max-width: 340px;
 }
 
 .items {
@@ -114,7 +114,7 @@ body {
 .section-header {
   text-align: center;
   color: var(--text-color);
-  font-size: 12.5px;
+  font-size: 16px;
   font-weight: 700;
   letter-spacing: 0.5px;
   text-transform: uppercase;
@@ -127,12 +127,12 @@ body {
   justify-content: center;
   position: relative;
   width: 100%;
-  padding: 15px 44px;
+  padding: 16px 38px;
   border-radius: 999px;
   border: 1.5px solid var(--btn-border);
   background: var(--btn-fill);
   color: var(--text-color);
-  font-size: 13.5px;
+  font-size: 16.5px;
   font-weight: 700;
   letter-spacing: 0.3px;
   text-decoration: none;
@@ -148,8 +148,8 @@ body {
 
 .link-btn .arrow {
   position: absolute;
-  right: 18px;
-  font-size: 15px;
+  right: 16px;
+  font-size: 17px;
   opacity: 0.85;
   transition: transform 0.15s ease;
 }
